@@ -8,8 +8,6 @@ export default function Confirmation() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [visible, setVisible] = useState(false);
-
-  // Prevent duplicate POST on re-render
   const orderSentRef = useRef(false);
 
   useEffect(() => {
@@ -18,23 +16,31 @@ export default function Confirmation() {
     if (!state || orderSentRef.current) return;
     orderSentRef.current = true;
 
-    // Send order to backend
+    const {
+      tableNumber,
+      items,
+      totalPrice,
+      paymentMethod,
+      paymentStatus
+    } = state;
+
     fetch(`${API_BASE}/api/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        tableNumber: state.tableNumber,
-        items: state.items,          // will later become item snapshots
-        total: state.totalPrice
+        tableNumber,
+        items,
+        total: totalPrice,
+        paymentMethod,   // ✅ FIX
+        paymentStatus    // ✅ FIX
       })
     })
       .then((res) => res.json())
       .then((data) => {
         console.log("✅ Order stored successfully:", data);
 
-        // 🔑 STEP 2: Replace frontend orderId with backend orderId
         navigate("/confirmation", {
           replace: true,
           state: {
@@ -58,17 +64,15 @@ export default function Confirmation() {
     );
   }
 
-  const { tableNumber, totalPrice, orderId } = state;
+  const { tableNumber, totalPrice, orderId, paymentMethod, paymentStatus } = state;
 
   return (
     <IpadFrame>
-      {/* FORCE TRUE CENTERING */}
       <div
         className={`absolute inset-0 flex items-center justify-center bg-pink-50 transition-all duration-500 ease-out
           ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}
         `}
       >
-        {/* CONFIRMATION CARD */}
         <div className="bg-white/80 backdrop-blur rounded-[2.5rem] shadow-2xl px-24 py-20 flex flex-col items-center text-center w-[760px]">
 
           <h2 className="text-6xl font-bold mb-8">
@@ -83,17 +87,28 @@ export default function Confirmation() {
             Order ID
           </p>
 
-          <p className="text-4xl font-bold mb-10">
+          <p className="text-4xl font-bold mb-6">
             {orderId || "Generating..."}
           </p>
 
+          <p className="text-xl mb-2">
+            Payment: <span className="font-semibold">{paymentMethod}</span>
+          </p>
+
+          <p className="text-xl mb-8">
+            Status:{" "}
+            <span className={`font-semibold ${paymentStatus === "PAID" ? "text-green-600" : "text-red-600"}`}>
+              {paymentStatus}
+            </span>
+          </p>
+
           <p className="text-3xl font-semibold mb-14">
-            Amount Paid: ₹{totalPrice}
+            Amount: ₹{totalPrice}
           </p>
 
           <button
             onClick={() => navigate("/")}
-            className="bg-black hover:bg-zinc-800 text-white px-28 py-6 rounded-2xl text-2xl font-semibold transition-transform hover:scale-105"
+            className="bg-black hover:bg-zinc-800 text-white px-28 py-6 rounded-2xl text-2xl font-semibold"
           >
             Back to Menu
           </button>
