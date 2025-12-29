@@ -8,6 +8,7 @@ export default function Payment() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [visible, setVisible] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("QR");
 
   useEffect(() => {
     setVisible(true);
@@ -25,49 +26,55 @@ export default function Payment() {
 
   const { items, totalPrice, tableNumber } = state;
 
+  const isPaid = paymentMethod !== "CASH";
+
   return (
     <TabletLayout>
-      {/* FULL HEIGHT CENTERING LAYER */}
       <div
         className={`h-full w-full flex items-center justify-center
           bg-gradient-to-b from-pink-50 to-pink-100
           transition-all duration-500 ease-out
-          ${visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}
-        `}
+          ${visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
       >
-        {/* PAYMENT CARD */}
-        <div
-          className="bg-white/95 backdrop-blur-xl
-                     rounded-[3rem]
-                     shadow-[0_30px_80px_rgba(0,0,0,0.25)]
-                     px-20 py-16
-                     flex flex-col items-center"
-        >
-          {/* Title */}
+        <div className="bg-white rounded-[3rem] shadow-2xl px-20 py-16 flex flex-col items-center w-[800px]">
+
           <h2 className="text-6xl font-bold mb-6">Payment</h2>
 
-          {/* Meta */}
-          <p className="text-2xl mb-2">
-            Table <span className="font-semibold">#{tableNumber}</span>
-          </p>
-          <p className="text-4xl font-bold mb-12">
-            ₹{totalPrice}
-          </p>
+          <p className="text-2xl mb-2">Table #{tableNumber}</p>
+          <p className="text-4xl font-bold mb-8">₹{totalPrice}</p>
 
-          {/* QR */}
-          <div className="bg-white rounded-[2.5rem] shadow-xl p-10 mb-10">
-            <img
-              src={`${API_BASE}/images/qr.jpg`}
-              alt="Payment QR"
-              className="w-[480px] h-[480px] object-contain"
-            />
+          {/* PAYMENT METHOD */}
+          <div className="w-full mb-8 space-y-3">
+            {["QR", "CARD", "CASH"].map((method) => (
+              <label
+                key={method}
+                className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer ${
+                  paymentMethod === method ? "border-green-600 bg-green-50" : "border-gray-300"
+                }`}
+              >
+                <span className="text-xl font-semibold">{method}</span>
+                <input
+                  type="radio"
+                  name="payment"
+                  value={method}
+                  checked={paymentMethod === method}
+                  onChange={() => setPaymentMethod(method)}
+                />
+              </label>
+            ))}
           </div>
 
-          <p className="text-gray-600 text-xl mb-12">
-            Scan the QR code to complete payment
-          </p>
+          {/* QR ONLY */}
+          {paymentMethod === "QR" && (
+            <div className="bg-white rounded-[2.5rem] shadow-xl p-8 mb-8">
+              <img
+                src={`${API_BASE}/images/qr.jpg`}
+                alt="QR"
+                className="w-[360px] h-[360px]"
+              />
+            </div>
+          )}
 
-          {/* Action */}
           <button
             onClick={() => {
               navigate("/confirmation", {
@@ -75,16 +82,14 @@ export default function Payment() {
                   items,
                   totalPrice,
                   tableNumber,
+                  paymentMethod,
+                  paymentStatus: isPaid ? "PAID" : "UNPAID"
                 }
               });
             }}
-            className="bg-green-600 hover:bg-green-700
-                       text-white px-24 py-6
-                       rounded-3xl text-2xl font-semibold
-                       transition-transform duration-200
-                       hover:scale-105 active:scale-95"
+            className="bg-green-600 hover:bg-green-700 text-white px-24 py-6 rounded-3xl text-2xl font-semibold"
           >
-            Confirm Payment
+            Confirm Order
           </button>
         </div>
       </div>
