@@ -81,8 +81,7 @@ Haru-no-Yorokobi/
 │   │   └── main.jsx
 │   └── vite.config.js
 │
-├── .vscode/                # Editor configuration
-├── .gitignore
+├── .gitignore              
 ├── package.json
 └── README.md
 ```
@@ -146,6 +145,9 @@ This allows staff to manage kitchen flow realistically.
 
 ## ▶️ Running the Project Locally
 
+```bash
+simply double click run_server.bat 
+```
 ### Backend
 ```bash
 cd backend
