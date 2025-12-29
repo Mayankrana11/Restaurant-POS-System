@@ -1,4 +1,7 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+
+const API_BASE = "http://localhost:5000";
 
 export default function MenuPage() {
   const [menuData, setMenuData] = useState([]);
@@ -6,14 +9,21 @@ export default function MenuPage() {
   const [cart, setCart] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // NEW: hamburger + table selector
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [tableNumber, setTableNumber] = useState(
+    sessionStorage.getItem("tableNumber")
+  ); 
+  
   const contentRef = useRef(null);
+  const navigate = useNavigate();
   const headerRef = useRef(null);
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
 
   // Load menu.json
   useEffect(() => {
-    fetch("/assets/menu.json")
+    fetch(`${API_BASE}/api/menu`)
       .then((r) => r.json())
       .then((data) => setMenuData(data))
       .catch((err) => console.error("MENU LOAD FAILED:", err));
@@ -113,11 +123,24 @@ export default function MenuPage() {
             ref={headerRef}
             className="flex-shrink-0 bg-black flex justify-between items-center text-white px-10"
           >
-            <button className="p-2 rounded-lg hover:bg-zinc-700">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"
-                   className="w-7 h-7" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round"
-                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+            {/* UPDATED HAMBURGER BUTTON */}
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="p-2 rounded-lg hover:bg-zinc-700 transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                stroke="currentColor"
+                className="w-7 h-7"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
               </svg>
             </button>
 
@@ -156,8 +179,9 @@ export default function MenuPage() {
                     </div>
 
                     <img
-                      src={item.image}
+                      src={`${API_BASE}${item.image}`}
                       className="w-full h-96 object-cover"
+                      alt={item.name}
                     />
 
                     <div className="p-6 flex flex-col">
@@ -216,6 +240,60 @@ export default function MenuPage() {
             ))}
           </footer>
 
+          {/* TABLE SELECTOR SIDEBAR */}
+          <aside
+            className={`absolute top-0 left-0 h-full w-[360px] bg-white shadow-2xl transform ${
+              menuOpen ? "translate-x-0" : "-translate-x-full"
+            } transition-transform duration-300 z-50 flex flex-col`}
+          >
+            <div className="flex justify-between items-center p-6 border-b">
+              <h3 className="text-2xl font-bold">Select Table</h3>
+              <button onClick={() => setMenuOpen(false)}>
+                <img
+                  src="/assets/icons/cross.png"
+                  className="w-10 h-10"
+                  style={{ filter: "grayscale(1) invert(1) brightness(2)" }}
+                />
+              </button>
+            </div>
+
+            <div className="p-6 grid grid-cols-3 gap-4">
+              {Array.from({ length: 12 }).map((_, i) => {
+                const table = i + 1;
+                const selected = Number(tableNumber) === table;
+
+                return (
+                  <button
+                    key={table}
+                    onClick={() => {
+                      setTableNumber(table);
+                      sessionStorage.setItem("tableNumber", table);
+                    }}
+                    className={`h-20 rounded-xl border-2 text-xl font-bold transition ${
+                      selected
+                        ? "bg-red-accent text-white border-red-accent"
+                        : "border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    Table {table}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-auto p-6 border-t">
+              {tableNumber ? (
+                <p className="text-green-600 font-semibold text-center">
+                  Selected Table: {tableNumber}
+                </p>
+              ) : (
+                <p className="text-red-500 font-semibold text-center">
+                  Please select a table
+                </p>
+              )}
+            </div>
+          </aside>
+
           {/* CART SIDEBAR */}
           <aside
             className={`absolute top-0 right-0 h-full w-[450px] bg-white shadow-2xl transform ${
@@ -242,7 +320,11 @@ export default function MenuPage() {
                     <div key={id} className="flex justify-between items-center">
                       <div className="flex items-center space-x-4">
                         <div className="relative">
-                          <img src={item.image} className="w-16 h-16 rounded-lg object-cover" />
+                          <img
+                            src={`${API_BASE}${item.image}`}
+                            className="w-16 h-16 rounded-lg object-cover"
+                            alt={item.name}
+                          />
                           <span className="cart-item-badge absolute -top-2 -right-2">{qty}</span>
                         </div>
                         <div>
@@ -262,8 +344,37 @@ export default function MenuPage() {
                 <span className="text-gray-600">Total:</span>
                 <span className="font-bold">₹{totalPrice}</span>
               </div>
-
               <button
+                onClick={() => {
+                  if (!tableNumber) {
+                    alert("Please select a table before proceeding.");
+                    return;
+                  }
+
+                  if (Object.keys(cart).length === 0) {
+                    alert("Your cart is empty.");
+                    return;
+                  }
+
+                  // ✅ DEFINE orderItems FIRST
+                  const orderItems = Object.keys(cart).map((id) => {
+                    const item = getItem(id);
+                    return {
+                      id: item.id,
+                      name: item.name,
+                      price: item.price,
+                      qty: cart[id]
+                    };
+                  });
+
+                  navigate("/payment", {
+                    state: {
+                      items: orderItems,   // ✅ snapshots
+                      totalPrice,
+                      tableNumber
+                    }
+                  });
+                }}
                 className="bg-red-accent hover:bg-red-accent-dark w-full text-white py-4 rounded-xl font-semibold"
               >
                 Proceed to Payment
