@@ -1,4 +1,4 @@
-# 🍜 Haru no Yorokobi — Restaurant Tablet Ordering & Staff Dashboard System
+#  Haru no Yorokobi — Restaurant Tablet Ordering & Staff Dashboard System
 
 Haru no Yorokobi is a **full-stack, tablet-based restaurant ordering system** that simulates a real in-restaurant POS workflow.  
 Customers place orders on a tablet at their table, select payment methods, and staff manage orders through a live dashboard.
@@ -7,7 +7,7 @@ This project follows **production-style frontend–backend separation**, snapsho
 
 ---
 
-## 🚀 Features
+##  Features
 
 ### Customer (Tablet Interface)
 - Tablet-optimized UI (iPad-style layout)
@@ -35,7 +35,7 @@ This project follows **production-style frontend–backend separation**, snapsho
 
 ---
 
-## 🧠 System Architecture
+##  System Architecture
 
 ```
 Customer Tablet (React)
@@ -55,7 +55,7 @@ Staff Dashboard (React)
 
 ---
 
-## 📁 Project Folder Structure
+##  Project Folder Structure
 
 ```
 Haru-no-Yorokobi/
@@ -88,7 +88,7 @@ Haru-no-Yorokobi/
 
 ---
 
-## 🔄 Order Flow (End-to-End)
+##  Order Flow (End-to-End)
 
 1. Customer selects items from menu
 2. Cart is converted into **item snapshots** (name, price, qty)
@@ -102,7 +102,7 @@ Haru-no-Yorokobi/
 
 ---
 
-## 💳 Payment Logic
+##  Payment Logic
 
 | Method | Payment Status |
 |------|---------------|
@@ -114,7 +114,7 @@ Payment status is stored independently from order lifecycle status.
 
 ---
 
-## 🧑‍🍳 Order Lifecycle
+##  Order Lifecycle
 
 ```
 NEW → ONGOING → COMPLETED
@@ -124,7 +124,7 @@ This allows staff to manage kitchen flow realistically.
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 ### Frontend
 - React
@@ -143,7 +143,7 @@ This allows staff to manage kitchen flow realistically.
 
 ---
 
-## ▶️ Running the Project Locally
+##  Running the Project Locally
 
 ```bash
 simply double click run_server.bat 
@@ -174,7 +174,7 @@ http://localhost:5173
 
 ---
 
-## 🔮 Future Improvements
+##  Future Improvements
 
 - Persist orders to a database (MongoDB / SQLite / Firebase)
 - Staff authentication / PIN-based access
@@ -184,7 +184,7 @@ http://localhost:5173
 
 ---
 
-## 📌 Why This Project Matters
+##  Why This Project Matters
 
 This project is **not a mock UI**.  
 It demonstrates:
@@ -196,7 +196,7 @@ It demonstrates:
 
 ---
 
-## 📄 License
+##  License
 
 This project is for educational and demonstration purposes.
 
